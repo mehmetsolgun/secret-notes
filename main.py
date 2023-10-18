@@ -1,5 +1,4 @@
 from tkinter import *
-from PIL import Image, ImageTk
 from tkinter import messagebox
 import cryptocode
 
@@ -13,11 +12,13 @@ def encrypt():
     basliktmetni = titleInput.get()
     notmetni = textInput.get("1.0", END)
     masterkey= masterkeyInput.get()
-    if basliktmetni == "":
-        messagebox.showinfo("Hata", "Lütfen bir başlık giriniz.")
-    sifrelenmismetin = cryptocode.encrypt(notmetni, masterkey)
-    with open("secretnotes4.txt", "a") as dosya:
-        dosya.write((basliktmetni + ":" + "\n" + sifrelenmismetin + "\n"))
+    if len(basliktmetni) == 0 or len(notmetni) == 0 or len(masterkey) == 0:
+        messagebox.showinfo("Hata", "Lütfen tüm bilgileri giriniz.")
+    else:
+        sifrelenmismetin = cryptocode.encrypt(notmetni, masterkey)
+        with open("secretnotes.txt", "a") as dosya:
+            dosya.write(("\n" + basliktmetni + ":" + "\n" + sifrelenmismetin + "\n"))
+        notLabel.config(text=f"{basliktmetni} başlıklı notunuz kaydedildi.")
     textInput.delete("1.0", END)
     titleInput.delete(0, END)
     masterkeyInput.delete(0, END)
@@ -26,19 +27,25 @@ def encrypt():
 def decrypt():
     notunsifresi= textInput.get("1.0", END)
     masterkey= masterkeyInput.get()
-    cozulmusmesaj= cryptocode.decrypt(notunsifresi, masterkey)
-    notLabel.config(text=cozulmusmesaj)
-    textInput.delete("1.0", END)
+    if len(notunsifresi) == 0 or len(masterkey) == 0:
+        messagebox.showinfo("Hata", "Lütfen tüm bilgileri giriniz.")
+    else:
+        try:
+            cozulmusmesaj= cryptocode.decrypt(notunsifresi, masterkey)
+            textInput.delete("1.0", END)
+            textInput.insert("1.0", cozulmusmesaj)
+            notLabel.config(text="Notunuz çözüldü.")
+        except:
+            messagebox.showinfo("Hata", "Şifrelenmemiş notu çözmeye çalışma!")
+            textInput.delete("1.0", END)
     masterkeyInput.delete(0, END)
 
 
 
 #ui
 
-logo = Image.open("secretnotes1.png")
-logo1 = ImageTk.PhotoImage(logo)
-
-logoLabel = Label(image=logo1, pady=50)
+logo= PhotoImage(file="secretnotes1.png")
+logoLabel = Label(image=logo, pady=50)
 logoLabel.pack()
 
 titleLabel = Label(text="Enter your title", pady=10, bg="black", fg="white", font=("Arial", 20, "normal"))
@@ -53,7 +60,7 @@ textLabel.pack()
 textInput= Text(width=30, height=15)
 textInput.pack()
 
-notLabel= Label(text="", pady=10, bg="black", fg="white",font=("Arial", 20, "normal"))
+notLabel= Label(text="", pady=10, bg="black", fg="white",font=("Arial", 15, "normal"))
 notLabel.pack()
 
 masterkeyLabel = Label(text="Enter your master key", pady=10, bg="black", fg="white",font=("Arial", 20, "normal"))
